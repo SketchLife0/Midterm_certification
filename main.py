@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 
 def Add():
@@ -20,7 +20,7 @@ def Add():
             if no_repeat:
                 name = input("Введите заголовок заметки: ").upper()
                 text = input("Введите текст заметки: ")
-                f.write(f'{int(a)};{name};{text};{datetime.datetime.now()}\n')
+                f.write(f'{int(a)};{name};{text};{datetime.now()}\n')
                 f.close()
                 print('Запись добавлена')
                 id = int(a)
@@ -73,28 +73,23 @@ def Edit():
                     edit_line = notes[i]
                     while True:
                         input_query = input('Хотите исправить заголовок или текст? ').title()
-                        if input_query == 'Заголовок':
-                            input_title = input('Введите новый заголовок: ').title()
-                            second_index = edit_line.find(';', index + 1)
-                            edit_line = edit_line.replace(edit_line[index + 1:second_index], input_title)
-                            last_index = edit_line.rfind(';')
-                            edit_line = edit_line.replace(edit_line[last_index + 1:], f"{datetime.datetime.now()}\n")
-                            notes[i] = edit_line
-                            break
-                        elif input_query == 'Текст':
-                            input_txt = input('Введите новый текст: ')
+                        t = ['Заголовок', 'Текст']
+                        if input_query in t:
+                            correct = input('Введите новый заголовок: ' if input_query == t[0] else 'Введите новый текст: ').title()
                             second_index = edit_line.find(';', index + 1)
                             third_index = edit_line.find(';', second_index + 1)
-                            edit_line = edit_line.replace(edit_line[second_index + 1:third_index], input_txt)
+                            index1 = index + 1 if input_query == t[0] else second_index + 1
+                            index2 = second_index if input_query == t[0] else third_index
+                            edit_line = edit_line.replace(edit_line[index1:index2], correct)
                             last_index = edit_line.rfind(';')
-                            edit_line = edit_line.replace(edit_line[last_index + 1:], f"{datetime.datetime.now()}\n")
+                            edit_line = edit_line.replace(edit_line[last_index + 1:], f"{datetime.now()}\n")
                             notes[i] = edit_line
                             break
                         elif input_query == 'Выход':
                             exit_code = True
                             break
                         else:
-                            print("Ошибка ввода")
+                            print('Ошибка: Некорректный ввод')
                     if exit_code:
                         break
                     with open("index.csv", "w", encoding="UTF-8") as f:
@@ -112,11 +107,11 @@ def Edit():
 
 
 def Show():
+    with open("index.csv", "r", encoding="UTF-8") as f:
+        notes = f.readlines()
     type = input("Фильтрация по дате или нет? ").title()
     if type == "Да":
         date = input("Введите дату в формате ГГГГ-ММ-ДД: ")
-        with open("index.csv", "r", encoding="UTF-8") as f:
-            notes = f.readlines()
         show_elem = 0
         for line in notes:
             last_index = line.rfind(';') + 1
@@ -125,16 +120,29 @@ def Show():
                 print(line.strip())
         if not show_elem:
             print("Записей нет")
-    else:
+    elif type == "Нет":
         choise = input("Показать все записи? ").title()
         if choise == 'Да':
-            with open("index.csv", "r", encoding="UTF-8") as f:
-                print(f.readline())
-        else:
+            for line in notes:
+                print(line.strip())
+        elif choise == 'Нет':
             id_line = input("Введите id: ")
-            with open("index.csv", "r", encoding="UTF-8") as f:
-                pass
-
+            if id_line.isdigit() and int(id_line) > 0:
+                for line in notes:
+                    elem = int(line[:line.find(';')])
+                    if int(id_line) == elem:
+                        print(line.strip())
+                        break
+            else:
+                print("Записи нет")
+        elif choise == 'Выход':
+            return
+        else:
+            print('Ошибка: Некорректный ввод')
+    elif type == "Выход":
+        return
+    else:
+        print('Ошибка: Некорректный ввод')
 
 
 def Help():
@@ -143,8 +151,6 @@ def Help():
     Редактировать - Редактировать существующую заметку
     Показать - Показать список всех заметок
     Выход - Выйти из приложения""")
-
-
 
 
 if __name__ == '__main__':
