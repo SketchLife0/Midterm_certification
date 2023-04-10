@@ -3,7 +3,7 @@ from datetime import datetime
 
 def Add():
     id = None
-    f = open("index.csv", "r+", encoding="UTF-8")
+    f = open("index.csv", "r+", encoding="utf-8")
     while not id:
         a = input('Введите id заметки: ')
         if a.title() == "Выход":
